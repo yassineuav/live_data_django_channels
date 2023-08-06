@@ -6,6 +6,7 @@ from . import views
 
 router = DefaultRouter()
 
+router.register("coordinates", views.CoordinatesViewSet, basename="coordinates")
 router.register("drone", views.DroneViewSet, basename="drone")
 router.register("dronetest", views.DroneTestViewSet, basename="dronetest")
 

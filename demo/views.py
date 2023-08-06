@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 
-from .models import Drone, DroneTest, Order, OrderStatus
-from .serializers import DroneTestSerializer, DroneSerializer, StatusSerializer, OrderSerializer
+from .models import Drone, DroneTest, Order, OrderStatus, Coordinates
+from .serializers import DroneTestSerializer, DroneSerializer, StatusSerializer, OrderSerializer, CoordinatesSerializer
 
 
 class DroneViewSet(viewsets.ModelViewSet):
@@ -13,6 +13,11 @@ class DroneViewSet(viewsets.ModelViewSet):
 class DroneTestViewSet(viewsets.ModelViewSet):
     serializer_class = DroneTestSerializer
     queryset = DroneTest.objects.all()
+
+
+class CoordinatesViewSet(viewsets.ModelViewSet):
+    serializer_class = CoordinatesSerializer
+    queryset = Coordinates.objects.all()
 
 
 class OrderViewSet(viewsets.ModelViewSet):
