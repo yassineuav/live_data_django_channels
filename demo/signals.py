@@ -1,14 +1,106 @@
+import asyncio
+import threading
+import time
+from itertools import cycle
+
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.dispatch import receiver
-from demo.models import Order
 
+from demo.models import Order, Drone, OrderStatus
+
+
+# if the status pending
+# check the weight if the wight < 50 and last update < 2 minutes
+# else return notification to admin dashboard weight is to heavy
+#
+# check if drones on
+# select one with battery 100%
+# calculate distance and way
 
 @receiver(post_save, sender=Order)
+def handle_order_save(sender, instance, created, **kwargs):
+    # post_save.disconnect(handle_post_save, sender=sender)
+
+        def set_update():
+            print("call set_update()")
+            status = OrderStatus.objects.count()
+            print(f'status count: {status}')
+
+            if instance.status.id == 2:
+                print(f'order id :{instance.status.id} status: {instance.status.status} ')
+                instance.status_id = 3
+                instance.save()
+                return instance
+            # for index in range(len(status) - 1):
+            #     current_status, next_status = next_status, next(status_cycle)
+            #     if instance.status.status == current_status:
+            #         print(f'{index} status : {current_status} -> {next_status}')
+            #         print(f'order id :{instance.status.id} status: {instance.status.status} ')
+            #         instance.status_id = 3
+            #         instance.save()
+            #         return instance
+        
+        if created:
+            print(f'New record inserted: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
+
+        else:
+            set_update()
+            print(f'Record updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
+            print(f'status history: {instance.status_history}')
+            # set_update()
+            # set_update()
+            # update_thread = threading.Thread(target=set_update, args=())
+            # update_thread.run()
+
+    # post_save.connect(handle_post_save, sender=sender)
+    # return instance
+        # post_save.disconnect(handle_post_save, sender=sender)
+        # post_save.connect(handle_post_save, sender=sender)
+
+
+@receiver(post_save, sender=OrderStatus)
+def create_order_status(sender, instance, created, **kwargs):
+    # post_save.disconnect(handle_post_save, sender=sender)
+    def set_create():
+        print("call set_update()")
+        status = ["pending",
+                  "in_aile",
+                  "picking_from_aile",
+                  "packaging_items",
+                  "to_departure_door",
+                  "in_departure_door",
+                  "ready_to_fly",
+                  "done"]
+
+        status_cycle = cycle(status)
+        next_status = next(status_cycle)
+        for index in range(len(status)-1):
+            current_status, next_status = next_status, next(status_cycle)
+            if instance.status == current_status:
+                print(f'{index} status : {current_status} -> {next_status}')
+                # instance.status = next_status
+                OrderStatus.objects.create(status=next_status)
+                # instance.save()
+                # return instance
+
+    if created:
+        print(f'New record inserted: id: {instance.id} Status {instance.status} update {instance.updated_at}',)
+        # set_create()
+    else:
+        print(f'Record updated: id: {instance.id} Status {instance.status} update {instance.updated_at}', )
+        # set_update()
+        # update_thread = threading.Thread(target=set_update, args=())
+        # update_thread.run()
+
+
+
+
+@receiver(post_save, sender=Drone)
 def handle_post_save(sender, instance, created, **kwargs):
     if created:
-        print("New record inserted:", instance)
+        print("New record inserted:", instance.status)
     else:
-        print("Record updated:", instance)
+        print("Record updated: Status", instance.status)
 
 
 @receiver(post_delete, sender=Order)

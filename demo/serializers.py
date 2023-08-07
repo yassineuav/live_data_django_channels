@@ -29,9 +29,20 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class HistoryStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatus
+        fields = '__all__'
+
+
 class OrderSerializer(serializers.ModelSerializer):
+    # status = StatusSerializer(read_only=True)
+    status_history = HistoryStatusSerializer(many=True, read_only=True)
+
     class Meta:
         model = Order
-        fields = ['id', 'weight', 'updated_at', 'status', 'status_description']
+        fields = ['id', 'weight', 'updated_at', 'status', 'status_history']
+        depth = 1
+
 
 

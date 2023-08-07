@@ -1,3 +1,4 @@
+from MySQLdb.constants.FIELD_TYPE import NULL
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -58,7 +59,11 @@ class SystemHistory(models.Model):
 
 
 class OrderStatus(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=250, default="pending")
+    updated = models.BooleanField(default=False)
+    description = models.TextField(default="no description")
+    comment = models.TextField(default="no comment")
+    # created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
@@ -73,5 +78,6 @@ class Order(models.Model):
     weight = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=250, default="pending")
-    status_description = models.TextField()
+    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
+    status_history = models.ManyToManyField(OrderStatus, related_name="status_history", default=1, blank=True, null=True)
+    # status_description = models.TextField()
