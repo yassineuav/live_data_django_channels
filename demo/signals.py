@@ -3,7 +3,7 @@ import threading
 import time
 from itertools import cycle
 
-from django.db.models.signals import post_save, post_delete, pre_delete
+from django.db.models.signals import post_save, post_delete, pre_delete, m2m_changed
 from django.dispatch import receiver
 
 from demo.models import Order, Drone, OrderStatus
@@ -17,43 +17,59 @@ from demo.models import Order, Drone, OrderStatus
 # select one with battery 100%
 # calculate distance and way
 
+
+@receiver(m2m_changed, sender=Order.status_history)
+def create_status_history(sender, instance, action, reverse, **kwargs):
+    print(f'action : {action} | instance : {action}')
+
+
+
 @receiver(post_save, sender=Order)
 def handle_order_save(sender, instance, created, **kwargs):
     # post_save.disconnect(handle_post_save, sender=sender)
 
-        def set_update():
-            print("call set_update()")
-            status = OrderStatus.objects.count()
-            print(f'status count: {status}')
+    def create_status():
+        print("creating status history")
+        # status = OrderStatus.objects.get(id=1)
+        instance.status_history.set([instance.status])
+        # print(f'status history {status}')
 
-            if instance.status.id == 2:
-                print(f'order id :{instance.status.id} status: {instance.status.status} ')
-                instance.status_id = 3
-                instance.save()
-                return instance
-            # for index in range(len(status) - 1):
-            #     current_status, next_status = next_status, next(status_cycle)
-            #     if instance.status.status == current_status:
-            #         print(f'{index} status : {current_status} -> {next_status}')
-            #         print(f'order id :{instance.status.id} status: {instance.status.status} ')
-            #         instance.status_id = 3
-            #         instance.save()
-            #         return instance
-        
-        if created:
-            print(f'New record inserted: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
+        # return instance
 
-        else:
-            set_update()
-            print(f'Record updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
-            print(f'status history: {instance.status_history}')
-            # set_update()
-            # set_update()
-            # update_thread = threading.Thread(target=set_update, args=())
-            # update_thread.run()
+    def set_update():
+        print("call set_update()")
+        if instance.status.id == 1:
+            print(f'order id :{instance.status.id} status: {instance.status.status} ')
+            instance.status_id = 2
+            instance.save()
+            instance.status_history.add(instance.status)
+            return instance
 
-    # post_save.connect(handle_post_save, sender=sender)
-    # return instance
+        # status = OrderStatus.objects.count()
+        # print(f'status count: {status}')
+        # status_cycle = cycle(status)
+        # next_status = next(status_cycle)
+        # for index in range(len(status) - 1):
+        #     current_status, next_status = next_status, next(status_cycle)
+        #     if instance.status.status == current_status:
+        #         print(f'{index} status : {current_status} -> {next_status}')
+        #         print(f'order id :{instance.status.id} status: {instance.status.status} ')
+        #         instance.status_id = next_status
+        #         instance.save()
+        #         return instance
+
+    if created:
+        create_status()
+        print(f'New record inserted: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
+    else:
+        print(f'Record updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
+        # update_status_history()
+        set_update()
+        print(f'after update updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
+        # update_thread = threading.Thread(target=set_update, args=())
+        # update_thread.run()
+
+        # post_save.connect(handle_post_save, sender=sender)
         # post_save.disconnect(handle_post_save, sender=sender)
         # post_save.connect(handle_post_save, sender=sender)
 
@@ -70,7 +86,15 @@ def create_order_status(sender, instance, created, **kwargs):
                   "to_departure_door",
                   "in_departure_door",
                   "ready_to_fly",
-                  "done"]
+                  "picking_by_drone",
+                  "start_flying",
+                  "in_air",
+                  "landing",
+                  "dropping_off",
+                  "front_off_door",
+                  "package_dropped_off",
+                  "enjoy",
+                  ]
 
         status_cycle = cycle(status)
         next_status = next(status_cycle)
@@ -85,7 +109,7 @@ def create_order_status(sender, instance, created, **kwargs):
 
     if created:
         print(f'New record inserted: id: {instance.id} Status {instance.status} update {instance.updated_at}',)
-        # set_create()
+        set_create()
     else:
         print(f'Record updated: id: {instance.id} Status {instance.status} update {instance.updated_at}', )
         # set_update()

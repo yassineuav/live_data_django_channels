@@ -68,7 +68,7 @@ class OrderStatus(models.Model):
 
 
 class Order(models.Model):
-    departure_address = models.CharField(max_length=200, default="36039 Pizzaro dr, Fremont, Ca, 94653")
+    departure_address = models.CharField(max_length=200, default="36039 Pizarro dr, Fremont, Ca, 94653")
     departure_latitude = models.DecimalField(max_digits=20, decimal_places=7, default="37.5566056")
     departure_longitude = models.DecimalField(max_digits=20, decimal_places=7, default="-122.0287363")
     landing_address = models.CharField(max_length=200, default="35820 Fremont Blvd, Fremont, CA 94536")
@@ -79,5 +79,12 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
-    status_history = models.ManyToManyField(OrderStatus, related_name="status_history", default=1, blank=True, null=True)
+    status_history = models.ManyToManyField(OrderStatus, related_name="status_history", blank=True, null=True)
     # status_description = models.TextField()
+
+
+
+# In this example, we'll create a default status when an item is created
+def get_default_status():
+    default_status, _ = OrderStatus.objects.get_or_create(name='default status')
+    return [default_status]
