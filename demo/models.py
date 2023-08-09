@@ -92,6 +92,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=250, default="pending")
-    status_history = models.ManyToManyField(OrderHistoryStatus)
+    status_id = models.SmallIntegerField(default=1)
+    status_history = models.ForeignKey(OrderHistoryStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
     description = models.TextField()
     # update_status = models.ForeignKey(OrderHistoryStatus, related_name='update_status', default=get_default_status, on_delete=models.CASCADE, blank=True, null=True)

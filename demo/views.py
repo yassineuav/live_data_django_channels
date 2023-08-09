@@ -23,6 +23,7 @@ class CoordinatesViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     queryset = Order.objects.all()
+    # queryset = Order.objects.all()
 
 
 class OrderStatusViewSet(viewsets.ModelViewSet):

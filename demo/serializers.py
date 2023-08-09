@@ -37,14 +37,19 @@ class HistoryStatusSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    # update_status = HistoryStatusSerializer(read_only=True)
     status_history = HistoryStatusSerializer(many=True, read_only=True)
+    status_history_test = serializers.SerializerMethodField()
+
+
+    def get_status_history_test(self, obj):
+        return HistoryStatusSerializer(obj.status_history_test_set.all(), many=True).data
+
 
     class Meta:
         model = Order
         # fields = '__all__'
-        fields = ['id', 'weight', 'description', 'updated_at', 'status', 'status_history']
-        depth = 1
+        fields = ['id', 'weight', 'description', 'updated_at', 'status', 'status_id', 'status_history', 'status_history_test']
+        # depth = 1
 
 
 

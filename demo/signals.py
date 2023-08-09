@@ -18,10 +18,9 @@ from demo.models import Order, Drone, OrderStatus, OrderHistoryStatus
 # calculate distance and way
 
 
-@receiver(m2m_changed, sender=Order.status_history)
-def create_status_history(sender, instance, action, reverse, **kwargs):
-    print(f'action : {action} | instance : {action}')
-
+# @receiver(m2m_changed, sender=Order.)
+# def create_status_history(sender, instance, action, reverse, **kwargs):
+#     print(f'action : {action} | instance : {action}')
 
 
 @receiver(post_save, sender=Order)
@@ -39,41 +38,47 @@ def handle_order_save(sender, instance, created, **kwargs):
         return instance
 
     def set_status_pending():
-        if instance.status.id != 1:
+        if instance.status_id != 1:
             print("clearing status history")
             instance.status_history.clear()
             print("creating pending status & status history")
             # status = OrderStatus()
-            status = OrderStatus.objects.get(id=1)
+            status, _created = OrderHistoryStatus.objects.get_or_create(id=1)
             instance.status_id = 1
+            instance.status = 'pending'
             instance.status_history.set([status])
             instance.save()
             return instance
 
     def set_update():
-        print("updating status & adding status_history")
+        # print("updating status & adding status_history")
         status = OrderStatus.objects.count()
+        # print("status count : ",status)
         time.sleep(2)
-        if instance.status.id != status:
-
+        if instance.status_id != status:
             for index in range(1, status):
                 time.sleep(2)
-                if instance.status.id == index:
-                    print(f'order status id :{instance.update_status.id} next status: {index+1} ')
-                    instance.update_status_id = index+1
-                    instance.update_status_history.add(instance.update_status)
+                if instance.status_id == index:
+                    next_status = index+1
+                    update_status = OrderStatus.objects.get(id=next_status)
+                    instance.status = update_status.status
+                    instance.status_id = index+1
+                    print(f'getting status {update_status.status} id {update_status.id}')
+                    my_status, _created = OrderHistoryStatus.objects.get_or_create(status=update_status.status)
+                    instance.status_history.add(my_status)
                     instance.save()
-        return instance
 
     if created:
-        create_status()
+        # create_status()
         print(f'New record inserted: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
     else:
         print(f'Record updated: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
         if instance.weight == 0:
-            create_status()
+            pass
+            # create_status()
             # set_status_pending()
-        # else:
+        else:
+            pass
             # set_update()
             # update_thread = threading.Thread(target=set_update, args=())
             # update_thread.run()
@@ -124,6 +129,7 @@ def create_order_status(sender, instance, created, **kwargs):
         print(f'New record inserted: id: {instance.id} Status {instance.status} update {instance.updated_at}',)
         set_create()
     else:
+        # set_create()
         print(f'Record updated: id: {instance.id} Status {instance.status} update {instance.updated_at}', )
         # set_update()
         # update_thread = threading.Thread(target=set_update, args=())
