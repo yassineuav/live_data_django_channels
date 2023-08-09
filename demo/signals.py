@@ -6,7 +6,7 @@ from itertools import cycle
 from django.db.models.signals import post_save, post_delete, pre_delete, m2m_changed
 from django.dispatch import receiver
 
-from demo.models import Order, Drone, OrderStatus
+from demo.models import Order, Drone, OrderStatus, OrderHistoryStatus
 
 
 # if the status pending
@@ -31,47 +31,60 @@ def handle_order_save(sender, instance, created, **kwargs):
     def create_status():
         print("creating status history")
         # status = OrderStatus.objects.get(id=1)
-        instance.status_history.set([instance.status])
-        # print(f'status history {status}')
+        status, _created = OrderHistoryStatus.objects.get_or_create(id=1)
+        print(f'status {status} created {_created}')
+        instance.status = status.status
+        instance.status_history.set([status])
+        instance.save()
+        return instance
 
-        # return instance
-
-    def set_update():
-        print("call set_update()")
-        if instance.status.id == 1:
-            print(f'order id :{instance.status.id} status: {instance.status.status} ')
-            instance.status_id = 2
+    def set_status_pending():
+        if instance.status.id != 1:
+            print("clearing status history")
+            instance.status_history.clear()
+            print("creating pending status & status history")
+            # status = OrderStatus()
+            status = OrderStatus.objects.get(id=1)
+            instance.status_id = 1
+            instance.status_history.set([status])
             instance.save()
-            instance.status_history.add(instance.status)
             return instance
 
-        # status = OrderStatus.objects.count()
-        # print(f'status count: {status}')
-        # status_cycle = cycle(status)
-        # next_status = next(status_cycle)
-        # for index in range(len(status) - 1):
-        #     current_status, next_status = next_status, next(status_cycle)
-        #     if instance.status.status == current_status:
-        #         print(f'{index} status : {current_status} -> {next_status}')
-        #         print(f'order id :{instance.status.id} status: {instance.status.status} ')
-        #         instance.status_id = next_status
-        #         instance.save()
-        #         return instance
+    def set_update():
+        print("updating status & adding status_history")
+        status = OrderStatus.objects.count()
+        time.sleep(2)
+        if instance.status.id != status:
+
+            for index in range(1, status):
+                time.sleep(2)
+                if instance.status.id == index:
+                    print(f'order status id :{instance.update_status.id} next status: {index+1} ')
+                    instance.update_status_id = index+1
+                    instance.update_status_history.add(instance.update_status)
+                    instance.save()
+        return instance
 
     if created:
         create_status()
         print(f'New record inserted: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
     else:
-        print(f'Record updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
-        # update_status_history()
-        set_update()
-        print(f'after update updated: id: {instance.id} Status {instance.status.status} update_at {instance.updated_at}', )
-        # update_thread = threading.Thread(target=set_update, args=())
-        # update_thread.run()
+        print(f'Record updated: id: {instance.id} Status {instance.status} update_at {instance.updated_at}', )
+        if instance.weight == 0:
+            create_status()
+            # set_status_pending()
+        # else:
+            # set_update()
+            # update_thread = threading.Thread(target=set_update, args=())
+            # update_thread.run()
+            # update_thread.start()
 
-        # post_save.connect(handle_post_save, sender=sender)
-        # post_save.disconnect(handle_post_save, sender=sender)
-        # post_save.connect(handle_post_save, sender=sender)
+        # Connect the signal handler using Django's signal framework
+        # my_signal.connect(signal_handler)
+
+        # Create and start a separate thread for signal handling
+        # signal_thread = threading.Thread(target=my_signal.send, args=(sender_instance,))
+        # signal_thread.start()
 
 
 @receiver(post_save, sender=OrderStatus)

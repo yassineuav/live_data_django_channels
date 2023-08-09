@@ -61,10 +61,23 @@ class SystemHistory(models.Model):
 class OrderStatus(models.Model):
     status = models.CharField(max_length=250, default="pending")
     updated = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class OrderHistoryStatus(models.Model):
+    status = models.CharField(max_length=250, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     description = models.TextField(default="no description")
     comment = models.TextField(default="no comment")
-    # created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_from = models.CharField(max_length=200, default="programmer")
+    # status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
+
+
+def get_default_status():
+    default_status, _ = OrderHistoryStatus.objects.get_or_create(status='pending')
+    return default_status
 
 
 class Order(models.Model):
@@ -78,13 +91,7 @@ class Order(models.Model):
     weight = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
-    status_history = models.ManyToManyField(OrderStatus, related_name="status_history", blank=True, null=True)
-    # status_description = models.TextField()
-
-
-
-# In this example, we'll create a default status when an item is created
-def get_default_status():
-    default_status, _ = OrderStatus.objects.get_or_create(name='default status')
-    return [default_status]
+    status = models.CharField(max_length=250, default="pending")
+    status_history = models.ManyToManyField(OrderHistoryStatus)
+    description = models.TextField()
+    # update_status = models.ForeignKey(OrderHistoryStatus, related_name='update_status', default=get_default_status, on_delete=models.CASCADE, blank=True, null=True)

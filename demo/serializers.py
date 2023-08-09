@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Drone, DroneTest, Order, OrderStatus, Coordinates
+from .models import Drone, DroneTest, Order, OrderStatus, Coordinates, OrderHistoryStatus
 
 
 class DroneSerializer(serializers.ModelSerializer):
@@ -31,17 +31,19 @@ class StatusSerializer(serializers.ModelSerializer):
 
 class HistoryStatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderStatus
+        model = OrderHistoryStatus
         fields = '__all__'
+        # depth = 1
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    # status = StatusSerializer(read_only=True)
+    # update_status = HistoryStatusSerializer(read_only=True)
     status_history = HistoryStatusSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'weight', 'updated_at', 'status', 'status_history']
+        # fields = '__all__'
+        fields = ['id', 'weight', 'description', 'updated_at', 'status', 'status_history']
         depth = 1
 
 
