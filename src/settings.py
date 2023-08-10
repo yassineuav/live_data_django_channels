@@ -85,17 +85,25 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        'HOST': '127.0.0.1',
-        'PORT': 3306,
-        "NAME": "drone",
-        "USER": "root",
-        "PASSWORD": "Yassine123",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'sqlite3.db', # This is where you put the name of the db file. 
+                 # If one doesn't exist, it will be created at migration time.
     }
 }
+
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         'HOST': '127.0.0.1',
+#         'PORT': 3306,
+#         "NAME": "drone",
+#         "USER": "root",
+#         "PASSWORD": "Yassine123",
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
