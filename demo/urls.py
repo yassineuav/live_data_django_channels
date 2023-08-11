@@ -12,6 +12,7 @@ router.register("dronetest", views.DroneTestViewSet, basename="dronetest")
 
 router.register("order", views.OrderViewSet, basename="order")
 router.register("order_status", views.OrderStatusViewSet, basename="order_status")
+router.register("order_histoy_status", views.OrderHistoryStatusViewSet , basename="order_histoy_status")
 
 urlpatterns = [
     path("", views.index,)
