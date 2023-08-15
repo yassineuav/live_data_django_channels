@@ -58,26 +58,12 @@ class SystemHistory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+# hint
 class OrderStatus(models.Model):
     status = models.CharField(max_length=250, default="pending")
     updated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-class OrderHistoryStatus(models.Model):
-    status = models.CharField(max_length=250, default="pending")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    description = models.TextField(default="no description")
-    comment = models.TextField(default="no comment")
-    updated_from = models.CharField(max_length=200, default="programmer")
-    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, default=1, blank=True, null=True)
-
-
-def get_default_status():
-    default_status, _ = OrderHistoryStatus.objects.get_or_create(status='pending')
-    return default_status
 
 
 class Order(models.Model):
@@ -87,12 +73,30 @@ class Order(models.Model):
     landing_address = models.CharField(max_length=200, default="35820 Fremont Blvd, Fremont, CA 94536")
     landing_latitude = models.DecimalField(max_digits=20, decimal_places=7, default="37.5605321")
     landing_longitude = models.DecimalField(max_digits=20, decimal_places=7, default="-122.0180234")
-    order_description = models.TextField()
+    order_description = models.TextField(default="no description")
+    description = models.TextField(default="no description")
     weight = models.IntegerField(default=10)
+    trigger = models.IntegerField(default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=250, default="pending")
     status_id = models.SmallIntegerField(default=1)
-    # status_history = models.ForeignKey(OrderHistoryStatus, on_delete=models.CASCADE, default=get_default_status, blank=True, null=True)
-    description = models.TextField()
-    # update_status = models.ForeignKey(OrderHistoryStatus, related_name='update_status', default=get_default_status, on_delete=models.CASCADE, blank=True, null=True)
+    # update_status = models.ForeignKey(OrderHistoryStatus, related_name='update_status', default=get_default_status,
+    # on_delete=models.CASCADE, blank=True, null=True)
+
+
+class OrderHistory(models.Model):
+    status = models.CharField(max_length=250, default="pending")
+    status_id = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    description = models.TextField(default="no description")
+    comment = models.TextField(default="no comment")
+    updated_from = models.CharField(max_length=200, default="programmer")
+    order_history = models.ForeignKey(Order, on_delete=models.CASCADE)
+
+
+def get_default_status():
+    default_status, _ = OrderHistory.objects.get_or_create(status='pending')
+    return default_status
+

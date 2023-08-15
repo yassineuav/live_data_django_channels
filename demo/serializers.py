@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Drone, DroneTest, Order, OrderStatus, Coordinates, OrderHistoryStatus
+from .models import Drone, DroneTest, Order, OrderStatus, Coordinates, OrderHistory
 
 
 class DroneSerializer(serializers.ModelSerializer):
@@ -31,25 +31,33 @@ class StatusSerializer(serializers.ModelSerializer):
 
 class HistoryStatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderHistoryStatus
+        model = OrderHistory
         fields = '__all__'
         # depth = 1
 
 
 class OrderSerializer(serializers.ModelSerializer):
     # status_history = HistoryStatusSerializer(many=True, read_only=True)
-    # status_history_test = serializers.SerializerMethodField()
+    status_history = serializers.SerializerMethodField()
 
+    def get_status_history(self, obj):
+        order_histories = OrderHistory.objects.filter(order_history_id=obj)
+        return HistoryStatusSerializer(order_histories, many=True).data
 
-    # def get_status_history_test(self, obj):
-        # return HistoryStatusSerializer(obj.status_history_test_set.all(), many=True).data
+    # status, _created = OrderHistory.objects.get_or_create(order_history_id=instance.id)
+    # print(f'creating new status {status}  | else _created {_created}')
 
+    def create(self, validated_data):
+        order = Order.objects.create(**validated_data)
+        OrderHistory.objects.create(order_history_id=order.id)
+        print(f'creating new order history status')
+        return order
 
     class Meta:
         model = Order
         # fields = '__all__'
-        fields = ['id', 'weight', 'description', 'updated_at', 'status', 'status_id']
-        # depth = 1
+        fields = ['id', 'weight', 'description', 'trigger', 'updated_at', 'status', 'status_id', 'status_history']
+        depth = 1
 
 
 

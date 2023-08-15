@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from django.shortcuts import render
 from rest_framework import viewsets
 
-from .models import Drone, DroneTest, Order, OrderHistoryStatus, OrderStatus, Coordinates
+from .models import Drone, DroneTest, Order, OrderHistory, OrderStatus, Coordinates
 from .serializers import DroneTestSerializer, DroneSerializer, HistoryStatusSerializer, StatusSerializer, OrderSerializer, CoordinatesSerializer
 
 
@@ -20,20 +22,21 @@ class CoordinatesViewSet(viewsets.ModelViewSet):
     queryset = Coordinates.objects.all()
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    serializer_class = OrderSerializer
-    queryset = Order.objects.all()
-    # queryset = Order.objects.all()
-
-
 class OrderStatusViewSet(viewsets.ModelViewSet):
     serializer_class = StatusSerializer
     queryset = OrderStatus.objects.all()
 
 
-class OrderHistoryStatusViewSet(viewsets.ModelViewSet):
+class OrderHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = HistoryStatusSerializer
-    queryset = OrderHistoryStatus.objects.all()
+    queryset = OrderHistory.objects.all()
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
+
+
 
 
 def index(request):
